@@ -130,6 +130,7 @@ sequence_len: 2048
 
 # Output directory
 dataset_prepared_path: "./data/prepared"
+# prepared_dataset_name: "alpaca_run"
 
 # Dataset configuration - supports both HuggingFace repos and local files
 datasets:
@@ -205,6 +206,7 @@ sequence_len: 2048
 
 # Output directory
 dataset_prepared_path: "./data/prepared_vl"
+# prepared_dataset_name: "vl_sample_run"
 
 # Vision Language dataset configuration
 datasets:
