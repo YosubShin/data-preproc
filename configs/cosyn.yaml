@@ -1,0 +1,68 @@
+# Simple filtering configuration that preserves original dataset structure
+# Uses HF Datasets .filter() method for efficient filtering without transformation
+
+base_model: Qwen/Qwen2.5-7B-Instruct
+tokenizer_config: Qwen/Qwen2.5-7B-Instruct
+trust_remote_code: true
+sequence_len: 16384
+
+dataset_prepared_path: ./data/prepared
+
+datasets:  
+  - path: allenai/CoSyn-400K
+    type: vision_language # Still need this for file path generation
+    split: validation
+    filter_only: true # Skip tokenization strategy - just filter and save
+    limit: 10240
+    subset: "_ALL"
+
+    # Use HF filter processor that preserves original structure
+    processors:
+      - type: random_sampler
+        sample_size: 1000
+        seed: 42
+
+      # # First filter by image count
+      # - type: image_count_filter
+      #   min_images: 1 # Filter out samples with less than 1
+      #   max_images: 1 # Filter out samples with more than 1
+
+      # Resize images larger than 768px down to 768px max
+      - type: image_transform
+        max_size: [768, 768]
+        resize_mode: "keep_aspect_ratio"
+
+      - type: longest_explanation_mapping
+        question_field: question
+        explanation_field: explanation
+        answer_field: answer
+        problem_field: problem
+        solution_field: solution
+        keep_unmapped: true
+        remove_source_fields: false
+
+      # - type: hf_filter
+      #   max_tokens: 13500 # Filter by tokenized length
+      #   # min_tokens: 750 # Min meaningful content
+      #   filter_corrupted_images: true # Remove corrupted images
+      #   min_image_size: [32, 32]
+      #   text_fields: ["solution"] # Fields to tokenize for length check
+
+      # - type: random_sampler
+      #   sample_size: 100
+      #   seed: 42
+
+train_on_inputs: false
+val_set_size: 0
+batch_size: 8
+
+# HF upload
+hf_upload:
+  enabled: true
+  organization: "yosubshin"
+  dataset_name: "cosyn"
+  private: false
+  description: "CoSyn-400K"
+  license: "apache-2.0"
+  tags: ["vision-language", "filtered"]
+  create_readme: true
